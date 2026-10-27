@@ -1,0 +1,51 @@
+name: build-windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6.8.3 (msvc2022_64)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+          dir: 'C:/Qt'
+          cache: true
+
+      - name: Install jom
+        run: choco install jom -y --no-progress
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure (qmake)
+        shell: cmd
+        run: |
+          set "PATH=C:\Qt\6.8.3\msvc2022_64\bin;%PATH%"
+          qmake -v
+          qmake OpenRGB.pro CONFIG-=debug_and_release CONFIG+=release
+
+      - name: Build (jom)
+        shell: cmd
+        run: jom
+
+      - name: Deploy Qt runtime
+        shell: cmd
+        run: |
+          set "PATH=C:\Qt\6.8.3\msvc2022_64\bin;%PATH%"
+          windeployqt --no-patchqt --no-quick-import --no-translations --no-system-d3d-compiler --no-compiler-runtime --no-opengl-sw --no-network .\release\
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenRGB-windows-qt6-msvc2022
+          path: release/
+          if-no-files-found: warn

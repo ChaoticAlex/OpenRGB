@@ -30,7 +30,7 @@ jobs:
       - name: Configure (qmake)
         shell: cmd
         run: |
-          set "PATH=C:\Qt\6.8.3\msvc2022_64\bin;%PATH%"
+          set "PATH=%QT_ROOT_DIR%\bin;%PATH%"
           qmake -v
           qmake OpenRGB.pro CONFIG-=debug_and_release CONFIG+=release
 
@@ -41,14 +41,14 @@ jobs:
       - name: Deploy Qt runtime
         shell: cmd
         run: |
-          set "PATH=C:\Qt\6.8.3\msvc2022_64\bin;%PATH%"
+          set "PATH=%QT_ROOT_DIR%\bin;%PATH%"
           windeployqt --no-patchqt --no-quick-import --no-translations --no-system-d3d-compiler --no-compiler-runtime --no-opengl-sw --no-network .\release\
 
       - name: Extra Qt modules needed by plugins
         shell: cmd
         run: |
-          copy "C:\Qt\6.8.3\msvc2022_64\bin\Qt6Core5Compat.dll" ".\release\"
-          copy "C:\Qt\6.8.3\msvc2022_64\bin\Qt6OpenGL.dll" ".\release\"
+          copy "%QT_ROOT_DIR%\bin\Qt6Core5Compat.dll" ".\release\"
+          copy "%QT_ROOT_DIR%\bin\Qt6OpenGL.dll" ".\release\"
           if not exist ".\release\Qt6Core5Compat.dll" exit /b 1
           if not exist ".\release\Qt6OpenGL.dll" exit /b 1
 
